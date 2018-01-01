@@ -63,6 +63,7 @@ export default class Scatterdapp implements IScatterdapp {
 	 * @returns {Promise<T>}
 	 */
 	private send(type, payload):Promise<any> {
+		console.log('Network', this.network)
 		return new Promise((resolve, reject) => {
 			let id = this.generateResolverId();
 			let message = new Message(type, payload, id, this.network);
@@ -90,7 +91,7 @@ export default class Scatterdapp implements IScatterdapp {
 	 * Signs a transaction
 	 * @param transaction - The transaction to sign */
 	public requestSignature(transaction:any):Promise<string|ScatterError> {
-		return this.send(MessageTypes.REQUEST_TRANSACTION, transaction)
+		return this.send(MessageTypes.REQUEST_SIGNATURE, transaction)
 	}
 
 	/***
