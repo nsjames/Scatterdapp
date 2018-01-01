@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "noImplicitAny": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "sourceMap": true,
+    "typeRoots" : ["./src/typings"],
+    "outDir": "dist"
+  },
+  "include": [
+    "src/**/*",
+    "typings/**/*" // <-- don't forget this line!
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts"
+  ]
+}
