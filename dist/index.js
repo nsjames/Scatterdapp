@@ -1,14 +1,4 @@
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory();
-	else if(typeof define === 'function' && define.amd)
-		define("Scatterdapp", [], factory);
-	else if(typeof exports === 'object')
-		exports["Scatterdapp"] = factory();
-	else
-		root["Scatterdapp"] = factory();
-})(typeof self !== 'undefined' ? self : this, function() {
-return /******/ (function(modules) { // webpackBootstrap
+/******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -70,11 +60,12 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ 	return __webpack_require__(__webpack_require__.s = 10);
 /******/ })
 /************************************************************************/
-/******/ ([
-/* 0 */
+/******/ ({
+
+/***/ 10:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -87,7 +78,7 @@ class IndexTest {
     loaded() {
         this.scatter = window.scatter;
         this.watchIncomingMessages();
-        this.scatter.sign("Hi").then(res => {
+        this.scatter.sign("Hi").then((res) => {
             console.log("RES", res);
         });
     }
@@ -101,6 +92,5 @@ let x = new IndexTest();
 
 
 /***/ })
-/******/ ]);
-});
-//# sourceMappingURL=scatterdapp.js.map
+
+/******/ });

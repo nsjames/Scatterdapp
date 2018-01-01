@@ -1,10 +1,16 @@
 const webpack = require("webpack");
+const path = require('path');
+
 module.exports = {
     // For testing only
     // entry:'./src/index-test.ts',
-    entry:'./src/scatterdapp.ts',
+    entry:{
+        'index.js':'./src/index-test.ts',
+        'scatterdapp.min.js':'./src/scatterdapp.ts',
+    },
     output: {
-        filename:'./dist/scatterdapp.min.js'
+        path: path.resolve(__dirname, './dist'),
+        filename: '[name]'
     },
     resolve: {
         extensions:['.ts', '.js']

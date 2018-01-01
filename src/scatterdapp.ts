@@ -6,7 +6,7 @@ const EOSMessageTypes = {
 };
 
 
-export class Scatterdapp {
+export default class Scatterdapp {
 	ext:string;
 	private stream:EncryptedStream;
 
@@ -34,5 +34,4 @@ export class Scatterdapp {
 	public subscribe(func:any){
 		this.stream.listenWith(func);
 	}
-
 }

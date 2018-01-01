@@ -1,4 +1,5 @@
-import {Scatterdapp} from './scatterdapp';
+import Scatterdapp from './scatterdapp';
+
 
 class IndexTest {
 	scatter:Scatterdapp;
@@ -11,7 +12,7 @@ class IndexTest {
 		this.scatter = (<any>window).scatter;
 		this.watchIncomingMessages();
 
-		this.scatter.sign("Hi").then(res => {
+		this.scatter.sign("Hi").then((res:any) => {
 			console.log("RES", res);
 		})
 	}
