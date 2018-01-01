@@ -16,29 +16,29 @@ export class EncryptedStream {
 	listenWith(func:any){
 		document.addEventListener(this.eventName, (e:any) => {
 			let msg = e.detail;
-			msg = (this.synced) ? AES.decrypt(msg, this.key) : msg;
+			msg = (this.synced || typeof msg === 'string') ? AES.decrypt(msg, this.key) : msg;
 			func(msg);
 		});
 	}
 
-	send(data:any, to:string):Promise<any>{
+	send(data:any, to:string):void {
 		const addSender = () => { data.from = this.eventName; };
 		const encryptIfSynced = () => { data = (this.synced) ? AES.encrypt(data, this.key) : data; };
 
-		return new Promise((resolve:any, reject:any) => {
-			if(typeof data !== 'object') { reject(); return; }
-			addSender();
-			encryptIfSynced();
-			this.dispatch(data, to);
-			resolve(true);
-		})
+		if(typeof data !== 'object') return;
+		addSender();
+		encryptIfSynced();
+		this.dispatch(data, to);
 	}
 
 	sync(to:string, handshake:string){
-		this.send({type:'sync', handshake}, to).then((res:any) => {
-			this.synced = true;
-		});
+		this.send({type:'sync', handshake}, to);
+	}
 
+	commitSync(scatter){
+		this.synced = true;
+		(<any>window).scatter = scatter;
+		document.dispatchEvent(new CustomEvent("scatterLoaded", {detail:{type:'loaded'}}));
 	}
 
 	private dispatch(encryptedData:any, to:string){ document.dispatchEvent(this.getEvent(encryptedData, to)); }

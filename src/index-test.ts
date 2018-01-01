@@ -1,28 +1,27 @@
 import Scatterdapp from './scatterdapp';
 
-
 class IndexTest {
 	scatter:Scatterdapp;
 
 	constructor(){
-		document.addEventListener('scatterLoaded', () => { this.loaded(); })
+		document.addEventListener('scatterLoaded', () => {this.loaded()})
 	}
 
 	private loaded(){
 		this.scatter = (<any>window).scatter;
-		this.watchIncomingMessages();
-
-		this.scatter.sign("Hi").then((res:any) => {
-			console.log("RES", res);
+		console.log(this.scatter, window);
+		this.scatter.requestPermissions().then(res => {
+			console.log("From page", res)
 		})
+		// this.watchIncomingMessages();
 	}
 
-	private watchIncomingMessages(){
-		this.scatter.subscribe((msg:any) => {
-			console.log("Message", msg);
-
-		})
-	}
+	// private watchIncomingMessages(){
+	// 	this.scatter.subscribe((msg:any) => {
+	// 		console.log("Message", msg);
+	//
+	// 	})
+	// }
 }
 
 let x = new IndexTest();
