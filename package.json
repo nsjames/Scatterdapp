@@ -2,7 +2,7 @@
   "name": "scatterdapp",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/scatterdapp.min.js",
+  "main": "lib/scatterdapp.min.js",
   "scripts": {
     "setup": "copyfiles -u 1 ./src/index.html ./dist",
     "webpack": "webpack --watch"

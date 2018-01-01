@@ -1,6 +1,6 @@
 import {EncryptedStream} from "./streams/EncryptedStream";
 
-const EOSMessageTypes = {
+export const EOSMessageTypes = {
 	SIGN_MSG:'SIGN_MSG',
 	GET_PUBLIC_KEY:'GET_PUBLIC_KEY'
 };

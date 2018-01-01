@@ -7,11 +7,16 @@ module.exports = {
     entry:{
         'index.js':'./src/index-test.ts',
         'scatterdapp.min.js':'./src/scatterdapp.ts',
+        'scatterdapp.js':'./src/scatterdapp.ts'
     },
     output: {
-        path: path.resolve(__dirname, './dist'),
-        filename: '[name]'
+        path: path.resolve(__dirname, './lib'),
+        filename: '[name]',
+        library: 'scatterdapp',
+        libraryTarget:'umd',
+        umdNamedDefine:true
     },
+    devtool: 'source-map',
     resolve: {
         extensions:['.ts', '.js']
     },
