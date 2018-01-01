@@ -101,18 +101,14 @@ export default class Scatterdapp implements IScatterdapp {
 	 * Sends a message to be encrypted with a known Public Key's Private Key.
 	 * @param publicKey - The public key to verify against */
 	public proveIdentity(publicKey:string):Promise<boolean|ScatterError> {
-		return new Promise((res:any, rej:any) => {
-			res(true)
-		})
+		return this.send(ScatterMessageTypes.PROVE_IDENTITY, publicKey)
 	}
 
 	/***
 	 * Signs a transaction
 	 * @param transaction - The transaction to sign */
 	public requestTransaction(transaction:any):Promise<string|ScatterError> {
-		return new Promise((res:any, rej:any) => {
-			res(true)
-		})
+		return this.send(ScatterMessageTypes.REQUEST_TRANSACTION, transaction)
 	}
 
 	/***
@@ -121,9 +117,7 @@ export default class Scatterdapp implements IScatterdapp {
 	 * 					  or omit the key for a total balance of all
 	 * 					  authorized wallets. */
 	public getBalance(publicKey:string = ''):Promise<number|ScatterError> {
-		return new Promise((res:any, rej:any) => {
-			res(true)
-		})
+		return this.send(ScatterMessageTypes.GET_BALANCE, publicKey)
 	}
 
 	/***
@@ -134,15 +128,12 @@ export default class Scatterdapp implements IScatterdapp {
 	private subscribe():void {
 		this.stream.listenWith((msg) => {
 			if(msg.type === 'sync'){ this.stream.commitSync(this); return false; }
-			let toSlice = -1;
 			for(let i=0; i < this.resolvers.length; i++) {
 				if (this.resolvers[i].id === msg.resolverId) {
 					this.resolvers[i].resolve(msg.payload);
-					console.log("slize", i)
 					this.resolvers = this.resolvers.slice(i, 1);
 				}
 			}
-			console.log(this.resolvers)
 		});
 	}
 }
