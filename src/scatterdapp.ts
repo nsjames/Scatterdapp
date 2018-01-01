@@ -1,35 +1,14 @@
-import {EncryptedStream} from "./streams/EncryptedStream";
-
-export const ScatterMessageTypes = {
-	REQUEST_PERMISSIONS:'rq_perm',
-	PROVE_IDENTITY:'prv_ident',
-	REQUEST_TRANSACTION:'rq_trx',
-	GET_BALANCE:'get_bal'
-};
-
-export class ScatterError {}
+import {EncryptedStream, Network, Message, MessageTypes, ScatterError} from "scattermodels";
 
 
-export class ScatterMessage {
-	type:string;
-	payload:any;
-	resolverId:string;
-
-	constructor(type:string, payload:any, resolverId:string){
-		this.type = type;
-		this.payload = payload;
-		this.resolverId = resolverId;
-	}
-
-	public static fromJson(json:any){ return Object.assign(new ScatterMessage("",{},""), json); }
-	public respond(payload:any){ return new ScatterMessage(this.type, payload, this.resolverId); }
-}
 
 export interface IScatterdapp {
 	// User specific
+	setNetwork(network:Network):void;
+
 	requestPermissions():Promise<string|ScatterError>;
 	proveIdentity(publicKey:string):Promise<boolean|ScatterError>;
-	requestTransaction(transaction:any):Promise<string|ScatterError>;
+	requestSignature(transaction:any):Promise<string|ScatterError>;
 	getBalance(publicKey:string):Promise<number|ScatterError>
 
 	// EOS Generic
@@ -54,6 +33,7 @@ export default class Scatterdapp implements IScatterdapp {
 	private endpoint:string;
 	private stream:EncryptedStream;
 	private resolvers:Array<DanglingResolver>;
+	private network:Network = Network.placeholder();
 
 	constructor(handshake:string){
 		this.resolvers = [];
@@ -65,6 +45,8 @@ export default class Scatterdapp implements IScatterdapp {
 		this.subscribe();
 		this.stream.sync(endpoint, handshake);
 	}
+
+	public setNetwork(network:Network){ this.network = network; }
 
 	// Todo: merge with Scatter extension's copy, and move to a shared library
 	private generateResolverId(size:number = 24){
@@ -83,7 +65,7 @@ export default class Scatterdapp implements IScatterdapp {
 	private send(type, payload):Promise<any> {
 		return new Promise((resolve, reject) => {
 			let id = this.generateResolverId();
-			let message = new ScatterMessage(type, payload, id);
+			let message = new Message(type, payload, id, this.network);
 			this.resolvers.push(new DanglingResolver(id, resolve, reject))
 			this.stream.send(message, endpoint);
 		})
@@ -94,21 +76,21 @@ export default class Scatterdapp implements IScatterdapp {
 	 *	Requests permissions from the domain to a wallet of the user's choosing.
 	 *  If the user denies the request it will return `false`, else a Public Key. */
 	public requestPermissions():Promise<string|ScatterError> {
-		return this.send(ScatterMessageTypes.REQUEST_PERMISSIONS, null)
+		return this.send(MessageTypes.REQUEST_PERMISSIONS, null)
 	}
 
 	/***
 	 * Sends a message to be encrypted with a known Public Key's Private Key.
 	 * @param publicKey - The public key to verify against */
 	public proveIdentity(publicKey:string):Promise<boolean|ScatterError> {
-		return this.send(ScatterMessageTypes.PROVE_IDENTITY, publicKey)
+		return this.send(MessageTypes.PROVE_IDENTITY, publicKey)
 	}
 
 	/***
 	 * Signs a transaction
 	 * @param transaction - The transaction to sign */
-	public requestTransaction(transaction:any):Promise<string|ScatterError> {
-		return this.send(ScatterMessageTypes.REQUEST_TRANSACTION, transaction)
+	public requestSignature(transaction:any):Promise<string|ScatterError> {
+		return this.send(MessageTypes.REQUEST_TRANSACTION, transaction)
 	}
 
 	/***
@@ -117,7 +99,7 @@ export default class Scatterdapp implements IScatterdapp {
 	 * 					  or omit the key for a total balance of all
 	 * 					  authorized wallets. */
 	public getBalance(publicKey:string = ''):Promise<number|ScatterError> {
-		return this.send(ScatterMessageTypes.GET_BALANCE, publicKey)
+		return this.send(MessageTypes.GET_BALANCE, publicKey)
 	}
 
 	/***

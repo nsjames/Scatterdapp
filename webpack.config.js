@@ -18,6 +18,7 @@ module.exports = {
     },
     devtool: 'source-map',
     resolve: {
+        alias: { scattermodels: path.join(__dirname, "node_modules/scattermodels") },
         extensions:['.ts', '.js']
     },
     module: {
