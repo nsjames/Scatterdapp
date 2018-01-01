@@ -1,8 +1,8 @@
 const webpack = require("webpack");
 module.exports = {
-    // entry:'./src/scatterdapp.ts',
     // For testing only
-    entry:'./src/index-test.ts',
+    // entry:'./src/index-test.ts',
+    entry:'./src/scatterdapp.ts',
     output: {
         filename:'./dist/scatterdapp.min.js'
     },
