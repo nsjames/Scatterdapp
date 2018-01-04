@@ -1,4 +1,4 @@
-import {EncryptedStream, Network, Message, MessageTypes, ScatterError} from "scattermodels";
+import {EncryptedStream, Network, NetworkMessage, NetworkMessageTypes, ScatterError, RandomIdGenerator, ContractPermission} from "scattermodels";
 
 
 
@@ -8,7 +8,7 @@ export interface IScatterdapp {
 
 	requestPermissions():Promise<string|ScatterError>;
 	proveIdentity(publicKey:string):Promise<boolean|ScatterError>;
-	requestSignature(transaction:any):Promise<string|ScatterError>;
+	requestSignature(transaction:any, permission:any):Promise<string|ScatterError>;
 	getBalance(publicKey:string):Promise<number|ScatterError>
 
 	// EOS Generic
@@ -33,7 +33,7 @@ export default class Scatterdapp implements IScatterdapp {
 	private endpoint:string;
 	private stream:EncryptedStream;
 	private resolvers:Array<DanglingResolver>;
-	private network:Network = Network.placeholder();
+	private network:Network = null;
 
 	constructor(handshake:string){
 		this.resolvers = [];
@@ -48,14 +48,6 @@ export default class Scatterdapp implements IScatterdapp {
 
 	public setNetwork(network:Network){ this.network = network; }
 
-	// Todo: merge with Scatter extension's copy, and move to a shared library
-	private generateResolverId(size:number = 24){
-		let text = "";
-		const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-		for(let i=0; i<size; i++) text += possible.charAt(Math.floor(Math.random() * possible.length));
-		return text;
-	}
-
 	/***
 	 * Converts a message into a promise
 	 * @param type
@@ -63,10 +55,15 @@ export default class Scatterdapp implements IScatterdapp {
 	 * @returns {Promise<T>}
 	 */
 	private send(type, payload):Promise<any> {
-		console.log('Network', this.network)
+		// TODO: Throw error to notify that a network needs to be set.
+		if(!this.network || this.network.host == '') {
+			alert("You must set a network before sending any messages")
+			return;
+		}
+
 		return new Promise((resolve, reject) => {
-			let id = this.generateResolverId();
-			let message = new Message(type, payload, id, this.network);
+			let id = RandomIdGenerator.generate(24);
+			let message = new NetworkMessage(type, payload, id, this.network);
 			this.resolvers.push(new DanglingResolver(id, resolve, reject))
 			this.stream.send(message, endpoint);
 		})
@@ -77,21 +74,33 @@ export default class Scatterdapp implements IScatterdapp {
 	 *	Requests permissions from the domain to a wallet of the user's choosing.
 	 *  If the user denies the request it will return `false`, else a Public Key. */
 	public requestPermissions():Promise<string|ScatterError> {
-		return this.send(MessageTypes.REQUEST_PERMISSIONS, null)
+		return this.send(NetworkMessageTypes.REQUEST_PERMISSIONS, window.location.host)
 	}
 
 	/***
 	 * Sends a message to be encrypted with a known Public Key's Private Key.
 	 * @param publicKey - The public key to verify against */
 	public proveIdentity(publicKey:string):Promise<boolean|ScatterError> {
-		return this.send(MessageTypes.PROVE_IDENTITY, publicKey)
+		return this.send(NetworkMessageTypes.PROVE_IDENTITY, publicKey)
 	}
 
 	/***
 	 * Signs a transaction
-	 * @param transaction - The transaction to sign */
-	public requestSignature(transaction:any):Promise<string|ScatterError> {
-		return this.send(MessageTypes.REQUEST_SIGNATURE, transaction)
+	 * @param transaction - The transaction to sign
+	 * @param permission */
+	public requestSignature(transaction:any, permission:ContractPermission):Promise<string|ScatterError> {
+		return new Promise((resolve, reject) => {
+			if(!permission || !permission.isValid()) {
+				reject(new ScatterError('The permission object is invalid'))
+				return;
+			}
+
+			// TODO: Error handling for proper transaction
+
+			this.send(NetworkMessageTypes.REQUEST_SIGNATURE, {transaction, permission})
+				.then(res => resolve(res))
+				.catch(e => reject(e));
+		})
 	}
 
 	/***
@@ -100,7 +109,7 @@ export default class Scatterdapp implements IScatterdapp {
 	 * 					  or omit the key for a total balance of all
 	 * 					  authorized wallets. */
 	public getBalance(publicKey:string = ''):Promise<number|ScatterError> {
-		return this.send(MessageTypes.GET_BALANCE, publicKey)
+		return this.send(NetworkMessageTypes.GET_BALANCE, publicKey)
 	}
 
 	/***
@@ -113,7 +122,8 @@ export default class Scatterdapp implements IScatterdapp {
 			if(msg.type === 'sync'){ this.stream.commitSync(this); return false; }
 			for(let i=0; i < this.resolvers.length; i++) {
 				if (this.resolvers[i].id === msg.resolverId) {
-					this.resolvers[i].resolve(msg.payload);
+					if(msg.type == 'error') this.resolvers[i].reject(msg.payload);
+					else this.resolvers[i].resolve(msg.payload);
 					this.resolvers = this.resolvers.slice(i, 1);
 				}
 			}
