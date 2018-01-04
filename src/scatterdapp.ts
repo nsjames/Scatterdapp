@@ -1,26 +1,12 @@
-import {EncryptedStream, Network, NetworkMessage, NetworkMessageTypes, ScatterError, RandomIdGenerator, ContractPermission} from "scattermodels";
+import {EncryptedStream, Network, NetworkMessage, NetworkMessageTypes, ScatterError, RandomIdGenerator, ContractPermission, EOSService} from "scattermodels";
 
 
 
 export interface IScatterdapp {
-	// User specific
 	setNetwork(network:Network):void;
-
 	requestPermissions():Promise<string|ScatterError>;
 	proveIdentity(publicKey:string):Promise<boolean|ScatterError>;
-	requestSignature(transaction:any, permission:any):Promise<string|ScatterError>;
-	getBalance(publicKey:string):Promise<number|ScatterError>
-
-	// EOS Generic
-	// getInfo()
-	// getBlock()
-	// getAccount()
-	// getAccountsFromPublicKey()
-	// getControlledAccounts()
-	// getContract()
-	// getTableRows()
-	// getTransaction()
-	// getTransactions()
+	provider(signargs:any);
 }
 
 class DanglingResolver {
@@ -49,11 +35,14 @@ export default class Scatterdapp implements IScatterdapp {
 	public setNetwork(network:Network){ this.network = network; }
 
 	/***
-	 * Converts a message into a promise
-	 * @param type
-	 * @param payload
-	 * @returns {Promise<T>}
+	 *
+	 * @param signargs - Automatically provided
+	 * @returns {Promise<any>}
 	 */
+	public provider = async (signargs:any) => {
+		return await this.send(NetworkMessageTypes.REQUEST_SIGNATURE, signargs);
+	};
+
 	private send(type, payload):Promise<any> {
 		// TODO: Throw error to notify that a network needs to be set.
 		if(!this.network || this.network.host == '') {
@@ -73,6 +62,14 @@ export default class Scatterdapp implements IScatterdapp {
 	/***
 	 *	Requests permissions from the domain to a wallet of the user's choosing.
 	 *  If the user denies the request it will return `false`, else a Public Key. */
+	public signWithAnyAccount(transaction:any):Promise<string|ScatterError> {
+		return this.send(NetworkMessageTypes.SIGN_WITH_ANY, transaction)
+	}
+
+
+	/***
+	 *	Requests permissions from the domain to a wallet of the user's choosing.
+	 *  If the user denies the request it will return `false`, else a Public Key. */
 	public requestPermissions():Promise<string|ScatterError> {
 		return this.send(NetworkMessageTypes.REQUEST_PERMISSIONS, window.location.host)
 	}
@@ -82,34 +79,6 @@ export default class Scatterdapp implements IScatterdapp {
 	 * @param publicKey - The public key to verify against */
 	public proveIdentity(publicKey:string):Promise<boolean|ScatterError> {
 		return this.send(NetworkMessageTypes.PROVE_IDENTITY, publicKey)
-	}
-
-	/***
-	 * Signs a transaction
-	 * @param transaction - The transaction to sign
-	 * @param permission */
-	public requestSignature(transaction:any, permission:ContractPermission):Promise<string|ScatterError> {
-		return new Promise((resolve, reject) => {
-			if(!permission || !permission.isValid()) {
-				reject(new ScatterError('The permission object is invalid'))
-				return;
-			}
-
-			// TODO: Error handling for proper transaction
-
-			this.send(NetworkMessageTypes.REQUEST_SIGNATURE, {transaction, permission})
-				.then(res => resolve(res))
-				.catch(e => reject(e));
-		})
-	}
-
-	/***
-	 * Signs a transaction
-	 * @param publicKey - Provide a Public Key for a balance of it,
-	 * 					  or omit the key for a total balance of all
-	 * 					  authorized wallets. */
-	public getBalance(publicKey:string = ''):Promise<number|ScatterError> {
-		return this.send(NetworkMessageTypes.GET_BALANCE, publicKey)
 	}
 
 	/***

@@ -1,10 +1,9 @@
-import { Network, ScatterError, ContractPermission } from "scattermodels";
+import { Network, ScatterError } from "scattermodels";
 export interface IScatterdapp {
     setNetwork(network: Network): void;
     requestPermissions(): Promise<string | ScatterError>;
     proveIdentity(publicKey: string): Promise<boolean | ScatterError>;
-    requestSignature(transaction: any, permission: any): Promise<string | ScatterError>;
-    getBalance(publicKey: string): Promise<number | ScatterError>;
+    provider(signargs: any): any;
 }
 export default class Scatterdapp implements IScatterdapp {
     private endpoint;
@@ -14,10 +13,10 @@ export default class Scatterdapp implements IScatterdapp {
     constructor(handshake: string);
     private initializeEncryptedStream(handshake);
     setNetwork(network: Network): void;
+    provider: (signargs: any) => Promise<any>;
     private send(type, payload);
+    signWithAnyAccount(transaction: any): Promise<string | ScatterError>;
     requestPermissions(): Promise<string | ScatterError>;
     proveIdentity(publicKey: string): Promise<boolean | ScatterError>;
-    requestSignature(transaction: any, permission: ContractPermission): Promise<string | ScatterError>;
-    getBalance(publicKey?: string): Promise<number | ScatterError>;
     private subscribe();
 }

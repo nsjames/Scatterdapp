@@ -9,55 +9,82 @@ class IndexTest {
 	}
 
 	private loaded(){
-		this.scatter = (<any>window).scatter;
-		console.log(this.scatter, window);
-		let network = new Network("Test Network 1", "testnet1.eos.io", 8888);
-		this.scatter.setNetwork(network);
-		// this.scatter.requestPermissions().then(res => {
-		// 	console.log("From Request Permissions", res)
-		// }).catch(e => {
-		// 	console.log("Request Permissions Error: ", e)
-		// })
 
+		this.scatter = (<any>window).scatter;
+		let network = new Network("Test Network 1", "192.168.56.101", 8888);
+		this.scatter.setNetwork(network);
+		let eos = (<any>window).Eos.Localnet({httpEndpoint:network.toEndpoint(), signProvider:this.scatter.provider});
 
 		document.getElementById('buy').addEventListener('click', () => {
-			let price = (<any>document.getElementById('price')).value;
-			let testTransaction = {
-				message: {
+			// This is how we can push a contract transaction when we pre-select the confirming account
+			//------------------------------------------------------------------------------------------
+			let trx = {
+				messages: [{
 					code: 'currency',
 					type: 'transfer',
-					authorization: [
-						{account: 'currency', permission: 'active'}
-					]
-				},
+					authorization: [{account: 'testacc', permission: 'active'}],
+					data:null
+				}],
 				data:{
-					from:'currency',
+					from:'testacc',
 					to:'inita',
-					quantity:price
+					quantity:5
 				},
-				scope:['currency', 'inita'],
-				publicKey:'' // active public of the contract creator(?)
+				scope:['testacc', 'inita'],
+				signatures:[]
 			};
-			console.log('testTransaction', testTransaction);
 
-
-			let contractPermission = new ContractPermission('cryptocrap.com', 'EOS Deposit', 'Basic deposit of coins into Crypto Craps to use for playing at the tables.')
-			this.scatter.requestSignature(testTransaction, contractPermission).then(res => {
-				console.log("From Request Signature", res)
-			}).catch(e => {
-				console.log("Request Signature Error: ", e)
+			let message = trx.messages[0];
+			eos.abiJsonToBin({code:message.code, action:message.type, args:trx.data}).then(bin => {
+				let bintrx = Object.assign({}, trx);
+				bintrx.messages[0].data = bin.binargs;
+				eos.contract('currency').then(currency => {
+					currency.transaction(bintrx)
+						.then(transaction => { console.log(transaction) })
+						.catch(e => { console.log('Authenticated sign error: ', e) /*User did not sign*/ })
+				})
 			})
+			//------------------------------------------------------------------------------------------
 		})
 
-		// this.watchIncomingMessages();
-	}
+		document.getElementById('buy2').addEventListener('click', () => {
 
-	// private watchIncomingMessages(){
-	// 	this.scatter.subscribe((msg:any) => {
-	// 		console.log("Message", msg);
-	//
-	// 	})
-	// }
+
+			// eos.transfer({from: 'testacc', to: 'inita', amount: 1, memo: ''}).then(res => {
+			// 	console.log("TEST: ", res)
+			// })
+
+			let trx = {
+				messages: [{
+					code: 'currency',
+					type: 'transfer',
+					authorization: [], // Left out, will be calculated after
+					data:{
+						from:'[scatter]', // Left out, will be calculated after
+						to:'inita',
+						quantity:5
+					}
+				}],
+				data:{
+					from:'[scatter]', // Left out, will be calculated after
+					to:'inita',
+					quantity:5
+				},
+				scope:['inita'],
+				signatures:[]
+			};
+
+			this.scatter.signWithAnyAccount(trx).then(x => {
+				console.log(x);
+			}).catch(e => { console.log('signWithAnyAccount error: ', e) /*User did not sign*/ })
+			//------------------------------------------------------------------------------------------
+		})
+
+
+
+
+
+	}
 }
 
 let x = new IndexTest();
