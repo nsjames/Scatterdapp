@@ -1,4 +1,4 @@
-import {EncryptedStream, Network, NetworkMessage, NetworkMessageTypes, ScatterError, RandomIdGenerator, ContractPermission, EOSService} from "scattermodels";
+import {EncryptedStream, Network, NetworkMessage, NetworkMessageTypes, ScatterError, RandomIdGenerator, ContractPermission} from "scattermodels";
 
 
 
