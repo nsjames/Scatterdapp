@@ -4,8 +4,9 @@ import {EncryptedStream, Network, NetworkMessage, NetworkMessageTypes, ScatterEr
 
 export interface IScatterdapp {
 	setNetwork(network:Network):void;
-	requestPermissions():Promise<string|ScatterError>;
+	requestIdentity():Promise<string|ScatterError>;
 	proveIdentity(publicKey:string):Promise<boolean|ScatterError>;
+	signWithAnyAccount(transaction:any):Promise<string|ScatterError>;
 	provider(signargs:any);
 }
 
@@ -60,25 +61,25 @@ export default class Scatterdapp implements IScatterdapp {
 
 
 	/***
-	 *	Requests permissions from the domain to a wallet of the user's choosing.
-	 *  If the user denies the request it will return `false`, else a Public Key. */
-	public signWithAnyAccount(transaction:any):Promise<string|ScatterError> {
-		return this.send(NetworkMessageTypes.SIGN_WITH_ANY, transaction)
-	}
-
-
-	/***
-	 *	Requests permissions from the domain to a wallet of the user's choosing.
-	 *  If the user denies the request it will return `false`, else a Public Key. */
-	public requestPermissions():Promise<string|ScatterError> {
-		return this.send(NetworkMessageTypes.REQUEST_PERMISSIONS, window.location.host)
+	 *	Requests an identity from the user. Will return an account name or error */
+	public requestIdentity():Promise<string|ScatterError> {
+		return this.send(NetworkMessageTypes.REQUEST_IDENTITY, {location:location.origin});
 	}
 
 	/***
 	 * Sends a message to be encrypted with a known Public Key's Private Key.
 	 * @param publicKey - The public key to verify against */
 	public proveIdentity(publicKey:string):Promise<boolean|ScatterError> {
-		return this.send(NetworkMessageTypes.PROVE_IDENTITY, publicKey)
+		const random = RandomIdGenerator.generate(128);
+		return this.send(NetworkMessageTypes.PROVE_IDENTITY, {random, publicKey})
+	}
+
+
+	/***
+	 *	Requests permissions from the domain to a wallet of the user's choosing.
+	 *  If the user denies the request it will return `false`, else a Public Key. */
+	public signWithAnyAccount(transaction:any):Promise<string|ScatterError> {
+		return this.send(NetworkMessageTypes.SIGN_WITH_ANY, transaction)
 	}
 
 	/***

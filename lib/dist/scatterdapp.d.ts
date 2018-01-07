@@ -1,8 +1,9 @@
 import { Network, ScatterError } from "scattermodels";
 export interface IScatterdapp {
     setNetwork(network: Network): void;
-    requestPermissions(): Promise<string | ScatterError>;
+    requestIdentity(): Promise<string | ScatterError>;
     proveIdentity(publicKey: string): Promise<boolean | ScatterError>;
+    signWithAnyAccount(transaction: any): Promise<string | ScatterError>;
     provider(signargs: any): any;
 }
 export default class Scatterdapp implements IScatterdapp {
@@ -15,8 +16,8 @@ export default class Scatterdapp implements IScatterdapp {
     setNetwork(network: Network): void;
     provider: (signargs: any) => Promise<any>;
     private send(type, payload);
-    signWithAnyAccount(transaction: any): Promise<string | ScatterError>;
-    requestPermissions(): Promise<string | ScatterError>;
+    requestIdentity(): Promise<string | ScatterError>;
     proveIdentity(publicKey: string): Promise<boolean | ScatterError>;
+    signWithAnyAccount(transaction: any): Promise<string | ScatterError>;
     private subscribe();
 }
