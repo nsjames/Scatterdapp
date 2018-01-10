@@ -11,54 +11,32 @@ class IndexTest {
 	private loaded(){
 
 		this.scatter = (<any>window).scatter;
-		let network = new Network("Test Network 1", "192.168.56.101", 8888);
+
+		let network = new Network("Localnet", "192.168.56.101", 8888);
 		// let network = new Network("Test Network 1", "testnet1.eos.io", 80);
 		// let network = new Network("Test Network 1", "failing.eos.io", 80);
+
 		this.scatter.setNetwork(network);
+
 		let eos = (<any>window).Eos.Localnet({httpEndpoint:network.toEndpoint(), signProvider:this.scatter.provider});
 
 		document.getElementById('buy').addEventListener('click', () => {
-			let trx = {
-				messages: [{
-					code: 'currency',
-					type: 'transfer',
-					authorization: [{account: 'testacc', permission: 'active'}],
-					data:null
-				}],
-				data:{
-					from:'testacc',
-					to:'inita',
-					quantity:1
-				},
-				scope:['testacc', 'inita'],
-				signatures:[]
-			};
-
-			let message = trx.messages[0];
-			eos.abiJsonToBin({code:message.code, action:message.type, args:trx.data}).then(bin => {
-				let bintrx = Object.assign({}, trx);
-				bintrx.messages[0].data = bin.binargs;
-				eos.contract('currency').then(currency => {
-					currency.transaction(bintrx)
-						.then(transaction => {
-							console.log(transaction)
-							bindTrxData('buy_vals', transaction);
-						})
-						.catch(e => { bindError('buy_vals', e) })
-				})
-			})
+			eos.transfer('testacc', 'inita', 10, '').then(transaction => {
+				bindTrxData('buy_vals', transaction);
+			}).catch(e => { bindError('buy_vals', e) })
 		})
 
 		document.getElementById('buy2').addEventListener('click', () => {
 			let trx = {
 				messages: [{
-					code: 'currency',
+					code: 'eos',
 					type: 'transfer',
 					authorization: [], // Left out, will be calculated after
 					data:{
 						from:'[scatter]', // Left out, will be calculated after
 						to:'inita',
-						quantity:1
+						amount:1,
+						memo:''
 					}
 				}],
 				scope:['inita'], // Leave out the other
@@ -66,7 +44,6 @@ class IndexTest {
 			};
 
 			this.scatter.signWithAnyAccount(trx).then(transaction => {
-				console.log(transaction);
 				bindTrxData('buy2_vals', transaction);
 			}).catch(e => { bindError('buy2_vals', e) })
 		})
@@ -81,9 +58,9 @@ class IndexTest {
 		document.getElementById('topup').addEventListener('click', () => {
 			this.scatter.requestIdentity().then(account => {
 				let webEos = (<any>window).Eos.Localnet({httpEndpoint:network.toEndpoint(), keyProvider:'5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'});
-				webEos.transfer('inita', account.name, 10000, '').then(res => {
-					console.log(res);
-				}).catch(e => console.log(e));
+				webEos.transfer('inita', account.name, 10000, '').then(transaction => {
+					bindTrxData('topup_vals', transaction);
+				}).catch(e => { bindError('topup_vals', e) })
 			}).catch(e => { bindError('topup_vals', e) })
 		})
 
