@@ -81,16 +81,9 @@ class IndexTest {
 		document.getElementById('topup').addEventListener('click', () => {
 			this.scatter.requestIdentity().then(account => {
 				let webEos = (<any>window).Eos.Localnet({httpEndpoint:network.toEndpoint(), keyProvider:'5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'});
-				webEos.transfer('inita', account.name, 10, '').then(res => {
+				webEos.transfer('inita', account.name, 10000, '').then(res => {
 					console.log(res);
 				}).catch(e => console.log(e));
-				// webEos.contract('currency').then(currency => {
-				// 	currency.transfer('inita', account.name, 1)
-				// 		.then(transaction => {
-				// 			console.log('Transfered', transaction)
-				// 			bindTrxData('topup_vals', transaction);
-				// 		}).catch(e => { bindError('topup_vals', e) })
-				// }).catch(e => { bindError('topup_vals', e) })
 			}).catch(e => { bindError('topup_vals', e) })
 		})
 
