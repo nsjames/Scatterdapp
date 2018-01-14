@@ -2,10 +2,8 @@ const webpack = require("webpack");
 const path = require('path');
 
 module.exports = {
-    // For testing only
-    // entry:'./src/index-test.ts',
     entry:{
-        'index.js':'./src/index-test.ts',
+        // 'index.js':'./src/index-test.ts',
         'scatterdapp.min.js':'./src/scatterdapp.ts',
         'scatterdapp.js':'./src/scatterdapp.ts'
     },
@@ -18,7 +16,6 @@ module.exports = {
     },
     devtool: 'source-map',
     resolve: {
-        alias: { scattermodels: path.join(__dirname, "node_modules/scattermodels") },
         extensions:['.ts', '.js']
     },
     module: {
