@@ -7,7 +7,6 @@ export interface IScatterdapp {
     provider(signargs: any): any;
 }
 export default class Scatterdapp implements IScatterdapp {
-    private endpoint;
     private stream;
     private resolvers;
     private network;

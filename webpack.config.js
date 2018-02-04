@@ -3,7 +3,7 @@ const path = require('path');
 
 module.exports = {
     entry:{
-        // 'index.js':'./src/index-test.ts',
+        'index.js':'./src/index-test.ts',
         'scatterdapp.min.js':'./src/scatterdapp.ts',
         'scatterdapp.js':'./src/scatterdapp.ts'
     },

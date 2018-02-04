@@ -17,7 +17,6 @@ class DanglingResolver {
 
 const endpoint = 'scatter';
 export default class Scatterdapp implements IScatterdapp {
-	private endpoint:string;
 	private stream:EncryptedStream;
 	private resolvers:Array<DanglingResolver>;
 	private network:Network = null;
