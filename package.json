@@ -4,7 +4,7 @@
   "description": "",
   "main": "lib/scatterdapp.min.js",
   "scripts": {
-    "setup": "copyfiles -u 1 ./src/index.html ./dist",
+    "setup": "copyfiles -u 1 ./src/index.html ./lib",
     "webpack": "webpack --watch"
   },
   "author": "nsjames",
