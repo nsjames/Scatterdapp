@@ -10,7 +10,7 @@
   "author": "nsjames",
   "license": "ISC",
   "dependencies": {
-    "eosjs": "^6.1.0",
+    "eosjs": "^6.1.4",
     "scattermodels": "^1.0.0"
   },
   "devDependencies": {

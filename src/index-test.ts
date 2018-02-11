@@ -24,20 +24,34 @@ class IndexTest {
 		// used with the Scatter extension. Trying to use a manually created eosjs instance
 		// with a fake scatter provider will fail due to WeakMap verification.
 		const eos = this.scatter.eos( Eos.Localnet, network, eosOptions );
+		console.log(Eos.Localnet());
 
 		let identity = null;
 
 		document.getElementById('ident').addEventListener('click', () => {
-			this.scatter.getIdentity(['account']).then(id => {
+			this.scatter.getIdentity(['account', 'firstname']).then(id => {
 				if(!id) return false;
 				this.scatter.useIdentity(id.hash);
 				identity = id;
 				console.log('Possible identity', id)
 			});
+
+			let webEos = Eos.Localnet({httpEndpoint:`http://${network.host}:${network.port}`, keyProvider:'5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'});
+			webEos.newaccount({
+				creator: 'inita',
+				name: 'tester2',
+				owner: 'EOS7aewJRtiZfSfdzKZyuDMQEhreNXPgZsqMTmhZFGFqP3aXHZaFi',
+				active: 'EOS7aewJRtiZfSfdzKZyuDMQEhreNXPgZsqMTmhZFGFqP3aXHZaFi',
+				recovery: 'inita',
+				deposit: `1 EOS`
+			}).then(acc => {
+				console.log(acc);
+			})
 		});
 
 		document.getElementById('buy').addEventListener('click', () => {
-			eos.transfer(identity.account.name, 'inita', 10, '').then(transaction => {
+			const requiredFields = ['country', 'phone'];
+			eos.transfer(identity.account.name, 'inita', 10, '', {requiredFields}).then(transaction => {
 				console.log('transaction', transaction);
 				bindTrxData('buy_vals', transaction);
 			}).catch(e => { bindError('buy_vals', e) })
