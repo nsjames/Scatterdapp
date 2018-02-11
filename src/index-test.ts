@@ -35,18 +35,6 @@ class IndexTest {
 				identity = id;
 				console.log('Possible identity', id)
 			});
-
-			let webEos = Eos.Localnet({httpEndpoint:`http://${network.host}:${network.port}`, keyProvider:'5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3'});
-			webEos.newaccount({
-				creator: 'inita',
-				name: 'tester2',
-				owner: 'EOS7aewJRtiZfSfdzKZyuDMQEhreNXPgZsqMTmhZFGFqP3aXHZaFi',
-				active: 'EOS7aewJRtiZfSfdzKZyuDMQEhreNXPgZsqMTmhZFGFqP3aXHZaFi',
-				recovery: 'inita',
-				deposit: `1 EOS`
-			}).then(acc => {
-				console.log(acc);
-			})
 		});
 
 		document.getElementById('buy').addEventListener('click', () => {
